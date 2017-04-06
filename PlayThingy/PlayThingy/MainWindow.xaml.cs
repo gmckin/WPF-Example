@@ -23,18 +23,20 @@ namespace PlayThingy
     /// </summary>
     public partial class MainWindow : Window
     {
+        internal const long MaxBufferSize = 0x7fffffffL; // 2147483647
         HttpClient client = new HttpClient();
         public MainWindow()
         {
             InitializeComponent();
-            client.BaseAddress = new Uri("http://localhost:8948/");
+            client.BaseAddress = new Uri("http://ec2-54-237-208-227.compute-1.amazonaws.com/thingyapi/");
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             this.Loaded += MainWindow_Loaded;
         }
         async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            HttpResponseMessage response = await client.GetAsync("/api/things");
+            
+            HttpResponseMessage response = await client.GetAsync("./api/things");
             response.EnsureSuccessStatusCode(); // Throw on error code. 
             var things = await response.Content.ReadAsAsync<IEnumerable<Things>>();
             thingyListView.ItemsSource = things;
@@ -43,7 +45,7 @@ namespace PlayThingy
 
         public async Task<IEnumerable<Things>> GetAllThingys()
         {
-            HttpResponseMessage response = await client.GetAsync("/api/things");
+            HttpResponseMessage response = await client.GetAsync("./api/things");
             response.EnsureSuccessStatusCode(); // Throw on error code. 
             var things = await response.Content.ReadAsAsync<IEnumerable<Things>>();
             return things;
@@ -53,7 +55,7 @@ namespace PlayThingy
         {
             try
             {
-                HttpResponseMessage response = await client.GetAsync("/api/things/?id=" + txtID.Text);
+                HttpResponseMessage response = await client.GetAsync("./api/things/?id=" + txtID.Text);
                 response.EnsureSuccessStatusCode(); // Throw on error code. 
                 var thingy = await response.Content.ReadAsAsync<Things>();
                 thingyDetailsPanel.Visibility = Visibility.Visible;
@@ -80,7 +82,7 @@ namespace PlayThingy
                     //gender = cbxGender.SelectedItem.ToString(),
 
                 };
-                var response = await client.PostAsJsonAsync("/api/things/", thing);
+                var response = await client.PostAsJsonAsync("./api/things/", thing);
                 response.EnsureSuccessStatusCode(); // Throw on error code. 
                 MessageBox.Show("Thingy Added Successfully", "Result", MessageBoxButton.OK, MessageBoxImage.Information);
                 thingyListView.ItemsSource = await GetAllThingys();
@@ -110,7 +112,7 @@ namespace PlayThingy
                     //gender = cbxGender.SelectedItem.ToString(),
 
                 };
-                var response = await client.PutAsJsonAsync("/api/things/?id="+txID.Text, thing);
+                var response = await client.PutAsJsonAsync("./api/things/?id="+txID.Text, thing);
                 response.EnsureSuccessStatusCode(); // Throw on error code. 
                 MessageBox.Show("Thingy Updated Successfully", "Result", MessageBoxButton.OK, MessageBoxImage.Information);
                 thingyListView.ItemsSource = await GetAllThingys();
@@ -130,7 +132,7 @@ namespace PlayThingy
         {
             try
             {
-                HttpResponseMessage response = await client.DeleteAsync("/api/things/?id=" + txtID.Text);
+                HttpResponseMessage response = await client.DeleteAsync("./api/things/?id=" + txtID.Text);
                 response.EnsureSuccessStatusCode(); // Throw on error code. 
                 MessageBox.Show("Thingy Successfully Deleted");
                 thingyListView.ItemsSource = await GetAllThingys();
